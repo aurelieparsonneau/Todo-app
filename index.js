@@ -64,9 +64,31 @@ app.use('/api', jsm);
  */
 app.set('view engine', 'ejs');
 
-app.get('/Martin', (req, res) => {
-    res.send('coucou');
+app.get('/', (req, res) => {
+    res.redirect('/tasks');
+});
+
+app.get('/tasks', (req, res) => {
+    const tasks = JSON.parse(fs.readFileSync('db.json')).tasks; // On récupère les tâches dans le fichier JSON.
+    res.render('tasks', { tasks });
 })
+
+/**
+ * Création d'une nouvelle tâche.
+ * On va créer une nouvelle tâche dans le fichier JSON.
+ */
+app.post('/tasks/create', (req, res) => {
+    const tasks = JSON.parse(fs.readFileSync('db.json')).tasks; // On récupère les tâches dans le fichier JSON.
+    const newTask = { // On crée une nouvelle tâche.
+        id: Date.now(), // On génère un id unique pour la nouvelle tâche.
+        title: req.body.title, // On récupère le titre de la nouvelle tâche.
+        description: req.body.description, // On récupère la description de la nouvelle tâche.
+        status: req.body.status, // On récupère le statut de la nouvelle tâche.
+    };
+    tasks.push(newTask); // On ajoute la nouvelle tâche dans le tableau des tâches.
+    fs.writeFileSync('db.json', JSON.stringify({ tasks })); // On enregistre les tâches dans le fichier JSON.
+    res.redirect('/tasks'); // On redirige l'internaute vers la page des tâches.
+});
 
 app.listen(3000, () => console.log('Le serveur est lancé sur le port 3000'));
 
